@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Baba</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #FFB5C0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Full height of the viewport */
+        }
+        #avatar {
+            position: absolute;
+            bottom: 20%; /* Adjusts based on viewport height */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100vw; /* Width is 60% of the viewport width */
+            height: auto; /* Maintain aspect ratio */
+            max-width: 200px; /* Maximum width */
+            max-height: 300px; /* Maximum height */
+            display: none; /* Initially hidden */
+        }
+        h1 {
+            text-align: center;
+            font-size: 5vw; /* Font size is 5% of the viewport width */
+            display: none; /* Initially hidden */
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center the text */
+            color: #f82a91; /* Pink color */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            white-space: nowrap; /* Prevent wrapping */
+            animation: zoom 1.5s infinite; /* Apply zoom animation */
+        }
+
+        @keyframes zoom {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2); /* Scale up */
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1); /* Scale back */
+            }
+        }
+    
+        /* Media Queries for additional responsiveness */
+        @media (max-width: 768px) {
+            #avatar {
+                width: 70vw; /* Adjust width for smaller screens */
+            }
+            h1 {
+                font-size: 6vw; /* Adjust font size for smaller screens */
+            }
+        }
+    
+        @media (max-width: 480px) {
+            #avatar {
+                width: 80vw; /* Further adjust width for very small screens */
+            }
+            h1 {
+                font-size: 7vw; /* Further adjust font size for very small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <img id="avatar" src="avatar.gif" alt="Avatar" onload="this.style.display='none';" />
+    <h1>🥳 Happy Birthday Baba 🥳</h1>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Set up the scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+    
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0xFFD1DC, 1); // Set background color to #FFB5C0
+        document.getElementById('container').appendChild(renderer.domElement);
+    
+        // Create the gift box
+        const geometry = new THREE.BoxGeometry(2, 2, 2);
+        const textureLoader = new THREE.TextureLoader();
+        
+        // Load a gift wrap texture
+        const giftTexture = textureLoader.load('didi.jpg'); // Replace with your texture URL
+        const material = new THREE.MeshBasicMaterial({ map: giftTexture });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+    
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+        animate();
+    
+        // Flag to check if audio is playing
+        let isAudioPlaying = false;
+        let confettiInterval; // Variable to hold the interval ID
+
+        // Function to trigger confetti at random positions
+        function triggerRandomConfetti() {
+            const x = Math.random(); // Random x coordinate (0 to 1)
+            const y = Math.random(); // Random y coordinate (0 to 1)
+
+            confetti({
+                particleCount: 100, // Number of particles per burst
+                spread: 50,
+                origin: { x: x, y: y } // Use random coordinates
+            });
+        }
+
+        // Explosion animation
+        document.getElementById('container').addEventListener('click', (event) => {
+            cube.scale.set(0, 0, 0);
+            const avatar = document.getElementById('avatar');
+            avatar.style.display = 'block'; // Show the GIF
+            document.querySelector('h1').style.display = 'block';
+
+            // Check if audio is already playing
+            if (!isAudioPlaying) {
+                const audio = new Audio('awww-tera-happy-bday.mp3'); // Replace with your audio file
+                audio.play();
+                audio.loop = true;
+                isAudioPlaying = true; // Set the flag to true
+            }
+
+            // Get click coordinates
+            const x = event.clientX / window.innerWidth; // Normalize x coordinate
+            const y = event.clientY / window.innerHeight; // Normalize y coordinate
+
+            // Trigger initial confetti at the click location
+            confetti({
+                particleCount: 1000, // Increase density
+                spread: 100,
+                origin: { x: x, y: y } // Use click coordinates
+            });
+
+            // Start blowing confetti at random points every 0.2 seconds indefinitely
+            confettiInterval = setInterval(triggerRandomConfetti, 300); // 200 milliseconds
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        });
+    </script>
+</body>
+</html>
